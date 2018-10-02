@@ -26,14 +26,13 @@ Mybatis를 Spring에서 사용하는 방법을 다룹니다.
     * [Mapper에서 SQL을 정의하는 방법](#Mapper에서%20SQL을%20정의하는%20방법)
     * [Mybatis에서 사용되는 객체에 대하여]()
     
-
 ## Mybatis란
 
-마이바티스는 질의 후 수행해야 하는 객체 매핑을 굉장히 적은 설정만으로도 대신 수행해줌으로써 프로그래머가 SQL 작성에만 신경쓸 수 있게 하는 Persistance Framework이다. 마이바티스는 `Primitive(or Wrapper)Type`, `Map`, `POJO`를 매핑할 수 있고, XML과 애노테이션을 사용할 수 있다. (어노테이션의 경우 Mybatis-spring에서만 가능)
+Mybatis는 질의 후 수행해야 하는 객체 매핑을 대신 수행해줌으로써 프로그래머가 SQL 작성에만 신경쓸 수 있게 하는 Persistance Framework이다. `Primitive(or Wrapper)Type`, `Map`, `POJO`를 매핑할 수 있고, 일부 설정은 (Spring을 사용하지 않아도) 어노테이션을 사용할 수 있다.
 
 ### Mybatis 설치
 
-- 최신버전: Last Published: 12 3월 2018 | Version: 3.4.7-SNAPSHOT
+- 최신버전: 3.4.7-SNAPSHOT (2018 3월 12일 배포)
 
 ```xml
 <dependency>
@@ -45,7 +44,7 @@ Mybatis를 Spring에서 사용하는 방법을 다룹니다.
 
 ### Mybatis의 설정
 
-Mybatis는 (Mybatis-spring을 사용하지 않는 경우, 당연하게도) XML 설정만을 지원한다. 이번 챕터는 Mybatis의 설정만을 다룬다.
+Mybatis **자체**의 설정은 (Spring을 사용하지 않는 경우, 당연하게도) XML 설정만을 지원한다. 이번 챕터는 Mybatis의 설정만을 다룬다.
 
 #### 기본 XML 정의
 
@@ -63,6 +62,47 @@ Mybatis는 (Mybatis-spring을 사용하지 않는 경우, 당연하게도) XML �
 - Mybatis의 XML 설정 옵션은 정말 많지만 이번에는 기본적이고 필수적인 설정만 다룬다. 아래 설정만 익혀도 Mybatis의 사용에는 문제가 없다.
 
 - Mybatis-Spring은 Bean으로 요소들을 등록하기 때문에 아래 방식으로 dataSource와 transactionManager를 사용할 수 없다. Spring과의 연동을 원하는 경우 참고만 하고 넘어가면 된다.
+
+```xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+<!-- 어떤 environment를 사용할지 기본값 설정 -->
+<environments default="development">
+    <!-- environment 의 정의 - 'development' -->
+    <environment id="development">
+    <!-- transactionManager 정의 -->
+    <transactionManager type="JDBC"/>
+    <!-- dataSource 정의 -->
+    <dataSource type="POOLED">
+        <property name="driver" value="${driver}"/>
+        <property name="url" value="${url}"/>
+        <property name="username" value="${username}"/>
+        <property name="password" value="${password}"/>
+    </dataSource>
+    </environment>
+</environments>
+<!-- Mapper들을 등록할 태그 -->
+<mappers>
+    <!-- Mapper XML 등록 -->
+    <!-- classpath 상대주소 방식 -->
+    <mapper resource="org/mybatis/example/BlogMapper.xml"/>
+    <mapper resource="org/mybatis/builder/PostMapper.xml"/>
+
+    <!-- URL 접근 방식 -->
+    <!-- /var 폴더 하에 있는 XML 파일에 접근 -->
+    <mapper url="file:///var/sqlmaps/AuthorMapper.xml"/>
+
+    <!-- Mapper 인터페이스 등록 -->
+    <mapper class="org.mybatis.builder.AuthorMapper" />
+
+    <!-- 해당 Package 이하의 모든 인터페이스가 등록됨 -->
+    <package name="org.mybatis.builder" />
+</mappers>
+</configuration>
+```
 
 1. `environtments`는 환경을 구분하는 데 사용되는 Tag이다. `environments` 태그에선 반드시 `default` 값이 필요하다.
 
@@ -88,47 +128,6 @@ Mybatis는 (Mybatis-spring을 사용하지 않는 경우, 당연하게도) XML �
 5. `mappers`는 Mapper를 감싸는 Tag 이다.
 
 6. `mapper`는 `resource`값을 필수적으로 지정해야 한다. 해당 값은 XML의 위치를 나타낸다. classpath 상대주소로 XML에 접근하거나, URL에 접근하는 방식, Mapper 인터페이스를 명시하는 방식, 패키지 명시 방식이 있다.
-
-    ```xml
-    <?xml version="1.0" encoding="UTF-8" ?>
-    <!DOCTYPE configuration
-    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
-    "http://mybatis.org/dtd/mybatis-3-config.dtd">
-    <configuration>
-    <!-- 어떤 environment를 사용할지 기본값 설정 -->
-    <environments default="development">
-        <!-- environment 의 정의 - 'development' -->
-        <environment id="development">
-        <!-- transactionManager 정의 -->
-        <transactionManager type="JDBC"/>
-        <!-- dataSource 정의 -->
-        <dataSource type="POOLED">
-            <property name="driver" value="${driver}"/>
-            <property name="url" value="${url}"/>
-            <property name="username" value="${username}"/>
-            <property name="password" value="${password}"/>
-        </dataSource>
-        </environment>
-    </environments>
-    <!-- Mapper들을 등록할 태그 -->
-    <mappers>
-        <!-- Mapper XML 등록 -->
-        <!-- classpath 상대주소 방식 -->
-        <mapper resource="org/mybatis/example/BlogMapper.xml"/>
-        <mapper resource="org/mybatis/builder/PostMapper.xml"/>
-
-        <!-- URL 접근 방식 -->
-        <!-- /var 폴더 하에 있는 XML 파일에 접근 -->
-        <mapper url="file:///var/sqlmaps/AuthorMapper.xml"/>
-
-        <!-- Mapper 인터페이스 등록 -->
-        <mapper class="org.mybatis.builder.AuthorMapper" />
-
-        <!-- 해당 Package 이하의 모든 인터페이스가 등록됨 -->
-        <package name="org.mybatis.builder" />
-    </mappers>
-    </configuration>
-    ```
 
 ## Mybatis-Spring이란
 
@@ -182,7 +181,7 @@ Mybatis-spring를 사용하더라도 동일한 작업을 해야 하는 것들에
 
 * XML vs Annotation
 
-    매핑된 구문을 일관된 방식으로 정의하는 것이 중요하다. 애노테이션은 XML로 쉽게 변환할 수 있고 그 반대의 형태 역시 쉽게 처리할 수 있다.
+    매핑된 구문을 일관된 방식으로 정의하는 것이 중요하다. 어노테이션은 XML로 쉽게 변환할 수 있고 그 반대의 형태 역시 쉽게 처리할 수 있다.
 
 ### Mapper에서 SQL을 정의하는 방법
 
