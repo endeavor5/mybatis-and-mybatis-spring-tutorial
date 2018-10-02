@@ -63,71 +63,71 @@ Mybatis **자체**의 설정은 (Spring을 사용하지 않는 경우, 당연하
 
 - Mybatis-Spring은 Bean으로 요소들을 등록하기 때문에 아래 방식으로 dataSource와 transactionManager를 사용할 수 없다. Spring과의 연동을 원하는 경우 참고만 하고 넘어가면 된다.
 
-```xml
-<?xml version="1.0" encoding="UTF-8" ?>
-<!DOCTYPE configuration
-PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-config.dtd">
-<configuration>
-<!-- 어떤 environment를 사용할지 기본값 설정 -->
-<environments default="development">
-    <!-- environment 의 정의 - 'development' -->
-    <environment id="development">
-    <!-- transactionManager 정의 -->
-    <transactionManager type="JDBC"/>
-    <!-- dataSource 정의 -->
-    <dataSource type="POOLED">
-        <property name="driver" value="${driver}"/>
-        <property name="url" value="${url}"/>
-        <property name="username" value="${username}"/>
-        <property name="password" value="${password}"/>
-    </dataSource>
-    </environment>
-</environments>
-<!-- Mapper들을 등록할 태그 -->
-<mappers>
-    <!-- Mapper XML 등록 -->
-    <!-- classpath 상대주소 방식 -->
-    <mapper resource="org/mybatis/example/BlogMapper.xml"/>
-    <mapper resource="org/mybatis/builder/PostMapper.xml"/>
+    ```xml
+    <?xml version="1.0" encoding="UTF-8" ?>
+    <!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+    <configuration>
+    <!-- 어떤 environment를 사용할지 기본값 설정 -->
+    <environments default="development">
+        <!-- environment 의 정의 - 'development' -->
+        <environment id="development">
+        <!-- transactionManager 정의 -->
+        <transactionManager type="JDBC"/>
+        <!-- dataSource 정의 -->
+        <dataSource type="POOLED">
+            <property name="driver" value="${driver}"/>
+            <property name="url" value="${url}"/>
+            <property name="username" value="${username}"/>
+            <property name="password" value="${password}"/>
+        </dataSource>
+        </environment>
+    </environments>
+    <!-- Mapper들을 등록할 태그 -->
+    <mappers>
+        <!-- Mapper XML 등록 -->
+        <!-- classpath 상대주소 방식 -->
+        <mapper resource="org/mybatis/example/BlogMapper.xml"/>
+        <mapper resource="org/mybatis/builder/PostMapper.xml"/>
 
-    <!-- URL 접근 방식 -->
-    <!-- /var 폴더 하에 있는 XML 파일에 접근 -->
-    <mapper url="file:///var/sqlmaps/AuthorMapper.xml"/>
+        <!-- URL 접근 방식 -->
+        <!-- /var 폴더 하에 있는 XML 파일에 접근 -->
+        <mapper url="file:///var/sqlmaps/AuthorMapper.xml"/>
 
-    <!-- Mapper 인터페이스 등록 -->
-    <mapper class="org.mybatis.builder.AuthorMapper" />
+        <!-- Mapper 인터페이스 등록 -->
+        <mapper class="org.mybatis.builder.AuthorMapper" />
 
-    <!-- 해당 Package 이하의 모든 인터페이스가 등록됨 -->
-    <package name="org.mybatis.builder" />
-</mappers>
-</configuration>
-```
+        <!-- 해당 Package 이하의 모든 인터페이스가 등록됨 -->
+        <package name="org.mybatis.builder" />
+    </mappers>
+    </configuration>
+    ```
 
-1. `environtments`는 환경을 구분하는 데 사용되는 Tag이다. `environments` 태그에선 반드시 `default` 값이 필요하다.
+    * `environtments`는 환경을 구분하는 데 사용되는 Tag이다. `environments` 태그에선 반드시 `default` 값이 필요하다.
 
-2. `environment`는 각 환경을 정의하며, `id`를 필수적으로 정의해야 한다.
+    * `environment`는 각 환경을 정의하며, `id`를 필수적으로 정의해야 한다.
 
-3. `transcationManager`는 Mybatis가 제공하는 TransactionManager를 설정하는 Tag로 `type`을 필수적으로 지정해야 한다. Mybatis는 `type`으로 `JDBC`와 `MANAGED`를 지원한다. `JDBC`는 JDBC의 트랜잭션을 Mybatis가 처리하게 되고, `MANAGED`는 Container에게 맡기고 (`CMT(Container-Managed Transaction`) connection을 close하는 것 이외에 아무것도 하지 않는다. - `MANAGED` 사용 시 공식 문서 참고
+    * `transcationManager`는 Mybatis가 제공하는 TransactionManager를 설정하는 Tag로 `type`을 필수적으로 지정해야 한다. Mybatis는 `type`으로 `JDBC`와 `MANAGED`를 지원한다. `JDBC`는 JDBC의 트랜잭션을 Mybatis가 처리하게 되고, `MANAGED`는 Container에게 맡기고 (`CMT(Container-Managed Transaction`) connection을 close하는 것 이외에 아무것도 하지 않는다. - `MANAGED` 사용 시 공식 문서 참고
 
-4. `dataSource`는 JDBC Connection 객체를 생성하는 방법을 정의하는 `type`을 필수적으로 정의해야 한다. `POOLED`와 `UNPOOLED`, `JNDI`가 올 수 있다. `UNPOOLED`, `JNDI` 사용 시 공식문서를 참고하기 바란다. `POOLED`의 경우 pooling을 수행하는 것으로, 옵션이 굉장히 많다. 
+    * `dataSource`는 JDBC Connection 객체를 생성하는 방법을 정의하는 `type`을 필수적으로 정의해야 한다. `POOLED`와 `UNPOOLED`, `JNDI`가 올 수 있다. `UNPOOLED`, `JNDI` 사용 시 공식문서를 참고하기 바란다. `POOLED`의 경우 pooling을 수행하는 것으로, 옵션이 굉장히 많다. 
 
-    - `poolMaximumActiveConnections = 10` – 주어진 시간에 존재할 수 있는 활성화된(사용중인) 커넥션의 수.
-    - `poolMaximumIdleConnections` – 주어진 시간에 존재할 수 있는 유휴 커넥션의 수
+        - `poolMaximumActiveConnections = 10` – 주어진 시간에 존재할 수 있는 활성화된(사용중인) 커넥션의 수.
+        - `poolMaximumIdleConnections` – 주어진 시간에 존재할 수 있는 유휴 커넥션의 수
 
-    - `poolMaximumCheckoutTime = 20000(ms, 20초)` – 강제로 리턴되기 전에 풀에서 “체크아웃” 될 수 있는 커넥션의 시간.
+        - `poolMaximumCheckoutTime = 20000(ms, 20초)` – 강제로 리턴되기 전에 풀에서 “체크아웃” 될 수 있는 커넥션의 시간.
 
-    - `poolTimeToWait = 20000(ms, 20초)` – 풀이 로그 상태를 출력하고 비정상적으로 긴 경우 커넥션을 다시 얻을려고 시도하는 로우 레벨 설정.
+        - `poolTimeToWait = 20000(ms, 20초)` – 풀이 로그 상태를 출력하고 비정상적으로 긴 경우 커넥션을 다시 얻을려고 시도하는 로우 레벨 설정.
 
-    - `poolPingQuery` – 커넥션이 작업하기 좋은 상태이고 요청을 받아서 처리할 준비가 되었는지 체크하기 위해 데이터베이스에 던지는 핑쿼리(Ping Query). 디폴트는 “핑 쿼리가 없음” 이다. 이 설정은 대부분의 데이터베이스로 하여금 에러메시지를 보게 할수도 있다.
+        - `poolPingQuery` – 커넥션이 작업하기 좋은 상태이고 요청을 받아서 처리할 준비가 되었는지 체크하기 위해 데이터베이스에 던지는 핑쿼리(Ping Query). 디폴트는 “핑 쿼리가 없음” 이다. 이 설정은 대부분의 데이터베이스로 하여금 에러메시지를 보게 할수도 있다.
 
-    - `poolPingEnabled = false` – 핑쿼리를 사용할지 말지를 결정. 사용한다면, 오류가 없는(그리고 빠른) SQL을 사용하여     - `poolPingQuery` 프로퍼티를 설정해야 한다.
+        - `poolPingEnabled = false` – 핑쿼리를 사용할지 말지를 결정. 사용한다면, 오류가 없는(그리고 빠른) SQL을 사용하여     - `poolPingQuery` 프로퍼티를 설정해야 한다.
 
-    - `poolPingConnectionsNotUsedFor = 0` – `poolPingQuery`가 얼마나 자주 사용될지 설정한다. 필요이상의 핑을 피하기 위해 데이터베이스의 타임아웃 값과 같을 수 있다. 디폴트 값은 `poolPingEnabled`가 `true`일 경우에만, 모든 커넥션이 매번 핑을 던지는 값이다. 
+        - `poolPingConnectionsNotUsedFor = 0` – `poolPingQuery`가 얼마나 자주 사용될지 설정한다. 필요이상의 핑을 피하기 위해 데이터베이스의 타임아웃 값과 같을 수 있다. 디폴트 값은 `poolPingEnabled`가 `true`일 경우에만, 모든 커넥션이 매번 핑을 던지는 값이다. 
 
-5. `mappers`는 Mapper를 감싸는 Tag 이다.
+    * `mappers`는 Mapper를 감싸는 Tag 이다.
 
-6. `mapper`는 `resource`값을 필수적으로 지정해야 한다. 해당 값은 XML의 위치를 나타낸다. classpath 상대주소로 XML에 접근하거나, URL에 접근하는 방식, Mapper 인터페이스를 명시하는 방식, 패키지 명시 방식이 있다.
+    * `mapper`는 `resource`값을 필수적으로 지정해야 한다. 해당 값은 XML의 위치를 나타낸다. classpath 상대주소로 XML에 접근하거나, URL에 접근하는 방식, Mapper 인터페이스를 명시하는 방식, 패키지 명시 방식이 있다.
 
 ## Mybatis-Spring이란
 
