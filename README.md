@@ -1,4 +1,4 @@
-# mybatis-spring-tutorial
+# mybatis-and-mybatis-spring-tutorial
 
 Mybatis를 Spring에서 사용하는 방법을 다룹니다.
 
@@ -140,7 +140,9 @@ Mybatis-spring를 사용하더라도 동일한 작업을 해야 하는 것들에
 
 * Mybatis는 SQL 작성과 리턴타입(or Map), 캐시 여부만 지정한다면 질의 이후 결과 객체를 받는 것까지의 기능이 구현된다. Mapper를 정의하는 것은 XML과 어노테이션(그냥 Mybatis에서도 가능) 모두 사용할 수 있다. 
 
-* XML로 Mapper를 정의하는 방법. 한 개의 매퍼 XML 파일에는 많은 수의 매핑 구문을 정의할 수 있다. 아래는 `org.mybatis.example.BlogMapper` 네임스페이스에서 selectBlog라는 매핑 구문을 정의한 것이다. 아래 Select는 `org.mybatis.example.BlogMapper.selectBlog` 형태로 실행할 수 있게 된다.
+* XML로 Mapper를 정의하는 방법
+    
+    한 개의 매퍼 XML 파일에는 많은 수의 매핑 구문을 정의할 수 있다. 아래는 `org.mybatis.example.BlogMapper` 네임스페이스에서 selectBlog라는 매핑 구문을 정의한 것이다. 아래 Select는 `org.mybatis.example.BlogMapper.selectBlog` 형태로 실행할 수 있게 된다.
 
     ```xml
     <mapper namespace="org.mybatis.example.BlogMapper">
@@ -150,7 +152,9 @@ Mybatis-spring를 사용하더라도 동일한 작업을 해야 하는 것들에
     </mapper>
     ```
 
-* 어노테이션으로 Mapper를 정의하는 방법. 인터페이스로 메소드를 정의하고, 각 메소드 위에 어노테이션으로 SQL을 정의하는 방법이다. 매핑된 구문은 XML 에 전혀 매핑될 필요가 없다.
+* 어노테이션으로 Mapper를 정의하는 방법
+
+    인터페이스로 메소드를 정의하고, 각 메소드 위에 어노테이션으로 SQL을 정의하는 방법이다. 매핑된 구문은 XML 에 전혀 매핑될 필요가 없다.
 
     ```java
     package org.mybatis.example;
@@ -161,7 +165,7 @@ Mybatis-spring를 사용하더라도 동일한 작업을 해야 하는 것들에
     }
     ```
 
-* Select 실행 방법
+* Mapper에 정의된 질의(아래 예시는 Select) 실행 방법
     
     첫 번째 방법
 
@@ -186,18 +190,18 @@ Mybatis-spring를 사용하더라도 동일한 작업을 해야 하는 것들에
 ### Mapper에서 SQL을 정의하는 방법
 
 1. 간단한 POJO 객체를 CRUD 하는 방법
-    * SQL에 필요한 Parameter 설정 - #{propName} 의 원리
-        1. Primitive Type의 경우 - 값 그대로 사용
-        2. Object의 경우 - 프로퍼티를 객체 내에서 찾아 그 값을 사용
-    * SQL에 필요한 Parameter 설정 - $ vs #
-        1. $는 SQL문을 값을 replace해서 그대로 execute한다. (이 때 escape은 자동으로 처리하지 않음) 따라서 $는 권장되는 옵션이 아니다.
-        2. #은 PreparedStatement의 값으로 전달한다.
-    * `<insert>`,`<select>`,`<update>`,`<delete>` 등의 예제와 설정할 수 있는 프로퍼티 소개
+    * SQL에 필요한 Parameter 설정 - #{propName} 사용 시
+        1. 클래스가 아닌 경우 - 값 그대로 사용
+        2. 클래스의 경우 - 프로퍼티를 객체 내에서 찾아 그 값을 사용
+    * SQL에 필요한 Parameter 설정 - `$` vs `#`
+        1. `$`는 SQL문에서 값을 `replace`하는 방식으로 질의한다. 이 때 escape은 자동으로 처리되지 않아 SQL Injection에 대한 방어가 수행되지 않기 때문에 권장되는 옵션이 아니다. 
+        2. `#`은 PreparedStatement의 값으로 전달한다.
+    * `<insert>`, `<select>`, `<update>`, `<delete>` 등의 예제와 설정할 수 있는 프로퍼티 소개
     * `parameterType`, `resultType`에 사용할 수 있는 Mybatis의 별칭 소개
 
 2. 좀 더 생산성을 높이는 방법
     * `<sql>`
-    * 타이핑을 줄이는 방법 - typeAlias 정의
+    * 타이핑을 줄이는 방법 - `typeAlias` 정의
 
         ```xml
         <!-- Mybatis XML 설정파일에서 -->
@@ -218,11 +222,11 @@ Mybatis-spring를 사용하더라도 동일한 작업을 해야 하는 것들에
         <select id="selectUsers" resultType="User" ... />
         ```
 
-3. 매핑 객체가 1-depth POJO가 아닌 경우
+3. 매핑 객체가 `1-depth` POJO가 아닌 경우
     * `<resultMap>` 정의 및 사용
 
-        ResultMap은 ResultSet을 Mapping하는 방법을 정의한 것이다. <br />
-        놀랍게도(?) ResultMap은 `resultType`으로 등록된 객체를 기준으로 자동 생성된다. <br />
+        `ResultMap`은 `ResultSet`을 Mapping하는 방법을 정의한 것이다. <br />
+        놀랍게도(?) `ResultMap`은 `resultType`으로 등록된 객체를 기준으로 자동 생성된다. <br />
         그러나 이 좋은 기능을 걷어차버리고 프로그래머가 직접 정의할 수도 있다. <br />
         직접 정의하는 경우 `resultMap` 속성을 사용하게 된다.
 
@@ -287,7 +291,7 @@ Mybatis-spring를 사용하더라도 동일한 작업을 해야 하는 것들에
         </resultMap>
         ```
 
-        Association Tag에서 resultMap의 ID를 사용하는 방법
+        아래는 Association Tag에서 resultMap의 ID를 사용하는 방법이다.
 
         ```sql
         /* 예제로 사용되는 SELECT문 */
@@ -323,7 +327,7 @@ Mybatis-spring를 사용하더라도 동일한 작업을 해야 하는 것들에
         ```
 
 4. Mybatis 수준에서 캐시하는 방법
-    * `<cache>`,`<cache-ref>`
+    * `<cache>`, `<cache-ref>`
 
 ### Mybatis에서 사용되는 객체에 대하여
 
