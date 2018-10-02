@@ -68,39 +68,40 @@ Mybatis **자체**의 설정은 (Spring을 사용하지 않는 경우, 당연하
     <!DOCTYPE configuration
     PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
     "http://mybatis.org/dtd/mybatis-3-config.dtd">
+    
     <configuration>
-    <!-- 어떤 environment를 사용할지 기본값 설정 -->
-    <environments default="development">
-        <!-- environment 의 정의 - 'development' -->
-        <environment id="development">
-        <!-- transactionManager 정의 -->
-        <transactionManager type="JDBC"/>
-        <!-- dataSource 정의 -->
-        <dataSource type="POOLED">
-            <property name="driver" value="${driver}"/>
-            <property name="url" value="${url}"/>
-            <property name="username" value="${username}"/>
-            <property name="password" value="${password}"/>
-        </dataSource>
-        </environment>
-    </environments>
-    <!-- Mapper들을 등록할 태그 -->
-    <mappers>
-        <!-- Mapper XML 등록 -->
-        <!-- classpath 상대주소 방식 -->
-        <mapper resource="org/mybatis/example/BlogMapper.xml"/>
-        <mapper resource="org/mybatis/builder/PostMapper.xml"/>
+        <!-- 어떤 environment를 사용할지 기본값 설정 -->
+        <environments default="development">
+            <!-- environment 의 정의 - 'development' -->
+            <environment id="development">
+            <!-- transactionManager 정의 -->
+            <transactionManager type="JDBC"/>
+            <!-- dataSource 정의 -->
+            <dataSource type="POOLED">
+                <property name="driver" value="${driver}"/>
+                <property name="url" value="${url}"/>
+                <property name="username" value="${username}"/>
+                <property name="password" value="${password}"/>
+            </dataSource>
+            </environment>
+        </environments>
+        <!-- Mapper들을 등록할 태그 -->
+        <mappers>
+            <!-- Mapper XML 등록 -->
+            <!-- classpath 상대주소 방식 -->
+            <mapper resource="org/mybatis/example/BlogMapper.xml"/>
+            <mapper resource="org/mybatis/builder/PostMapper.xml"/>
 
-        <!-- URL 접근 방식 -->
-        <!-- /var 폴더 하에 있는 XML 파일에 접근 -->
-        <mapper url="file:///var/sqlmaps/AuthorMapper.xml"/>
+            <!-- URL 접근 방식 -->
+            <!-- /var 폴더 하에 있는 XML 파일에 접근 -->
+            <mapper url="file:///var/sqlmaps/AuthorMapper.xml"/>
 
-        <!-- Mapper 인터페이스 등록 -->
-        <mapper class="org.mybatis.builder.AuthorMapper" />
+            <!-- Mapper 인터페이스 등록 -->
+            <mapper class="org.mybatis.builder.AuthorMapper" />
 
-        <!-- 해당 Package 이하의 모든 인터페이스가 등록됨 -->
-        <package name="org.mybatis.builder" />
-    </mappers>
+            <!-- 해당 Package 이하의 모든 인터페이스가 등록됨 -->
+            <package name="org.mybatis.builder" />
+        </mappers>
     </configuration>
     ```
 
