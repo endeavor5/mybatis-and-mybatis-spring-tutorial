@@ -14,6 +14,12 @@
 
 [Mybatis-Spring 한글문서](http://www.mybatis.org/spring/ko/index.html)
 
+## 사용 가능한 플러그인/라이브러리
+
+[Mybaptise - 이클립스 Mybatis 플러그인](https://github.com/mybatis/mybatipse)
+
+[Mybatis Generator - 라이브러리](https://github.com/mybatis/generator)
+
 ## 목차
 
 * [Mybatis란](#mybatis란)
@@ -24,7 +30,7 @@
 * [Mybatis-Spring이란](#mybatis-spring이란)
     * [Mybatis-spring 설치](#mybatis-spring-설치)
     * [Mybatis-Spring의 설정 방법](#mybatis-spring의-설정-방법)
-    * [Mybatis-Spring을 썼을 때의 장단점](#mybatis-spring을-썼을-때의-장단점)
+    * [Mybatis-Spring을 썼을 때의 장단점 (작성중)](#mybatis-spring을-썼을-때의-장단점)
 * [공통으로 적용되는 내용](#공통으로-적용되는-내용)
     * [Mapper 정의하기](#mapper-정의하기)
     * [Mapper에서 SQL을 정의하는 방법](#mapper에서-SQL을-정의하는-방법)
@@ -33,10 +39,10 @@
             * [SELECT 시 각 필드를 매핑하는 데 사용되는 태그](#select-시-각-필드를-매핑하는-데-사용되는-태그)
         * [좀 더 생산성을 높이는 방법](#좀-더-생산성을-높이는-방법)
         * [매핑 객체가 1-depth POJO가 아닌 경우](#매핑-객체가-1-depth-pojo가-아닌-경우)
-    * [Mybatis 수준에서 캐시하는 방법](#mybatis-수준에서-캐시하는-방법)
-    * [Mybatis의 동적 SQL: 조건문](#mybatis의-동적-sql-조건문)
-    * [Mybatis에서 사용되는 객체에 대하여](#mybatis에서-사용되는-객체에-대하여)
-* [Mybatis 처음부터 끝까지 직접 설정하기](#mybatis-처음부터-끝까지-직접-설정하기)
+    * [Mybatis 수준에서 캐시하는 방법 (작성중)](#mybatis-수준에서-캐시하는-방법)
+    * [Mybatis의 동적 SQL: 조건문 (작성중)](#mybatis의-동적-sql-조건문)
+    * [Mybatis에서 사용되는 객체에 대하여 (작성중)](#mybatis에서-사용되는-객체에-대하여)
+* [Mybatis 처음부터 끝까지 직접 설정하기 (작성중)](#mybatis-처음부터-끝까지-직접-설정하기)
     
 ## Mybatis란
 
@@ -56,7 +62,7 @@ Mybatis는 질의 후 수행해야 하는 객체 매핑을 대신 수행해줌�
 
 ### Mybatis의 설정
 
-Mybatis **자체**의 설정은 (Spring을 사용하지 않는 경우, 당연하게도) XML 설정만을 지원한다. 이번 챕터는 Mybatis의 설정만을 다룬다.
+Mybatis **자체**의 설정은 XML 설정만을 지원한다. 이번 챕터는 Mybatis의 설정만을 다룬다.
 
 #### 기본 XML 정의
 
@@ -260,7 +266,10 @@ Spring 프레임워크 상에서 Mybatis를 사용하려면, Spring Application 
         </bean>
 
         <!-- Spring Bean 정의 시 parent 속성을 이용하여 속성을 상속받을 수 있다. -->
-        <!-- class, lazy-init 속성을 상속받고 sqlSesionFactory를 주입받는다 -->
+        <!-- parent 속성 사용 시 property 모두를 상속받고 따라서 sqlSesionFactory를 주입받는다. -->
+        <!-- parent 속성 사용 시 class를 정의하지 않은 경우 parent의 class를 사용하게 된다. -->
+        <!-- class 속성 말고도, constructor, init-method, destroy-method도 마찬가지이다. -->
+        <!-- lazy-init, depends-on, autowire-mode, dependency-check, scope는 상속하지 않는다. -->
         <bean id="oneMapper" parent="baseMapper">
             <property name="mapperInterface" value="my.package.MyMapperInterface" />
         </bean>
@@ -271,6 +280,8 @@ Spring 프레임워크 상에서 Mybatis를 사용하려면, Spring Application 
         ```
 
 ### Mybatis-Spring을 썼을 때의 장단점
+
+
 
 ## 공통으로 적용되는 내용
 
