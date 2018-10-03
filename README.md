@@ -50,13 +50,13 @@ Mybatis는 질의 후 수행해야 하는 객체 매핑을 대신 수행해줌�
 
 ### Mybatis 설치
 
-- 최신버전: 3.4.7-SNAPSHOT (2018 3월 12일 배포)
+- 최신버전: 3.4.6 (2018 3월 12일 배포)
 
 ```xml
 <dependency>
   <groupId>org.mybatis</groupId>
   <artifactId>mybatis</artifactId>
-  <version>3.4.7-SNAPSHOT</version>
+  <version>3.4.6</version>
 </dependency>
 ```
 
