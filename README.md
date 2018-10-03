@@ -22,8 +22,9 @@
         * [기본 XML 정의](#기본-xml-정의)
         * [기본이 되는 XML 설정 예시](#기본이-되는-xml-설정-예시)
 * [Mybatis-Spring이란](#mybatis-spring이란)
-    * [Mybatis-Spring의 설정 방법]()
-    * [Mybatis-Spring을 썼을 때의 장단점]()
+    * [Mybatis-spring 설치](#mybatis-spring-설치)
+    * [Mybatis-Spring의 설정 방법](#mybatis-spring의-설정-방법)
+    * [Mybatis-Spring을 썼을 때의 장단점](#mybatis-spring을-썼을-때의-장단점)
 * [공통으로 적용되는 내용](#공통으로-적용되는-내용)
     * [Mapper 정의하기](#mapper-정의하기)
     * [Mapper에서 SQL을 정의하는 방법](#mapper에서-SQL을-정의하는-방법)
@@ -35,6 +36,7 @@
     * [Mybatis 수준에서 캐시하는 방법](#mybatis-수준에서-캐시하는-방법)
     * [Mybatis의 동적 SQL: 조건문](#mybatis의-동적-sql-조건문)
     * [Mybatis에서 사용되는 객체에 대하여](#mybatis에서-사용되는-객체에-대하여)
+* [Mybatis 처음부터 끝까지 직접 설정하기](#mybatis-처음부터-끝까지-직접-설정하기)
     
 ## Mybatis란
 
@@ -71,7 +73,7 @@ Mybatis **자체**의 설정은 (Spring을 사용하지 않는 경우, 당연하
 
 - Mybatis의 XML 설정 옵션은 정말 많지만 이번에는 기본적이고 필수적인 설정만 다룬다. 아래 설정만 익혀도 Mybatis의 사용에는 문제가 없다.
 
-- Mybatis-Spring은 Bean으로 요소들을 등록하기 때문에 아래 방식으로 dataSource와 transactionManager를 사용할 수 없다. Spring과의 연동을 원하는 경우 참고만 하고 넘어가면 된다.
+- Mybatis-Spring은 Bean으로 요소들을 등록하기 때문에 아래 방식으로 environment, dataSource,transactionManager를 사용할 수 없다. (무시된다. 공식 문서 참고) Spring과의 연동을 원하는 경우 참고만 하고 넘어가면 된다.
 
     ```xml
     <?xml version="1.0" encoding="UTF-8" ?>
@@ -142,6 +144,133 @@ Mybatis **자체**의 설정은 (Spring을 사용하지 않는 경우, 당연하
 
 ## Mybatis-Spring이란
 
+Mybatis-Spring은 Mybatis를 Spring에 매끈하게 통합하는 라이브러리입니다. 이 라이브러리는 Mybatis가 Spring Transanction에 참여할 수 있게하고, Mybatis Mapper과 SqlSession 객체의 생성과 이들을 다른 객체에 주입하는 일, Mybatis의 Exception을 Spring의 Exception으로 변환하는 등의 일을 수행합니다. 
+
+### Mybatis-spring 설치
+
+```xml
+<dependency>
+    <groupId>org.mybatis</groupId>
+    <artifactId>mybatis-spring</artifactId>
+    <version>1.3.2</version>
+</dependency>
+```
+
+### Mybatis-Spring의 설정 방법
+
+Spring 프레임워크 상에서 Mybatis를 사용하려면, Spring Application Context에 `SqlSessionFactory` 빈과 최소 하나의 `Mapper` 인터페이스가 존재해야합니다. (Mapper 인터페이스는 Annotation, XML 방식 어느 것을 사용하더라도 존재해야 함.) 
+
+1. SqlSessionFactory 빈 등록
+
+    Mybatis에선 `sqlSessionFactory` 객체를 `SqlSessionFactoryBuilder` 객체로 생성하지만, Mybatis-Spring에서는 `SqlSessionFactory` 객체를 Spring의 FactoryBean인 `SqlSessionFactoryBean` 객체를 Bean으로 등록하게 되므로 Factory의 빈은 아래와 같이 XML 설정을 해야 합니다. (참고: FactoryBean은 `getObject()` 메소드로 반환한 객체가 Spring에서 빈으로 최종 생성됨)
+
+    ```xml
+    <!-- class를 SqlSessionFactoryBean을 사용함 -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <!-- sqlSessionFactory에 dataSource 주입 -->
+        <property name="dataSource" ref="dataSource" />
+        
+        <!-- Mybatis XML config 파일이 전달될 수 있음 -->
+        <!-- 이 때 config 파일 내용은 완전한 Mybatis 설정일 필요가 없음 -->
+        <!-- 오히려, environtment, dataSource, transactionManager는 무시됨 -->
+        <!-- 해당 config에선 settings, typeAliases, mappers 등을 정의할 수 있음 -->
+        <property name="configLocation" value="..." />
+
+        <!-- Mybatis XML mapper 파일들의 경로를 지정함 (Ant 패턴 사용) -->
+        <!-- 이 방식을 사용하면, SqlSessionTemplate을 사용해서 실행하게 된다. -->
+        <!-- 이 방식을 사용하는 경우, Mapper를 직접 @Autowired 받을 수 없다. -->
+        <property name="mapperLocations" value="classpath*:sample/cfg/mappers/**/*.xml" />
+    </bean>
+
+    <!-- 1.3.0 버전부터 configuration 프로퍼티가 추가되었음. -->
+    <!-- Configuration 객체를 지정하는 것으로, Mybatis Config 파일을 대체할 수도 있음. -->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+        <property name="dataSource" ref="dataSource" />
+        <property name="configuration">
+            <!-- Configuration 구현체 등록 -->
+            <bean class="org.apache.ibatis.session.Configuration">
+                <property name="mapUnderscoreToCamelCase" value="true"/>
+            </bean>
+        </property>
+    </bean>
+    ```
+
+2. Mapper 빈 등록
+
+    * Mybatis-spring 라이브러리 사용 시에는 직접 SqlSession을 사용하지 않고도, Mapper 객체를 Spring에서 `@Autowired`로 의존성 주입을 받을 수 있다. (이 객체는 `org.apache.ibatis.binding.MapperProxy` 프록시 객체이다.)
+    
+    * 위에서 빈으로 등록한 `sqlSessionFactory`에 `mapperLocations`으로 mapper XML 설정을 반드시 완료해야 한다. `MapperProxy` 객체에서 `sqlSession` 객체에 대한 참조를 갖고, `sqlSession` 객체는 `configuration` 객체에서 mapper 설정을 보유하기 때문이다.
+
+    * 당연하게도 Mapper 객체를 주입받으려면, Spring Context에 빈으로 등록해야 한다. Mybatis-Spring에서는 한꺼번에 등록하는 방식을 지원한다. `MapperFactoryBean`을 통해서 1개씩 등록할 수도 있는데, 권장하진 않는다.
+
+    * 한꺼번에 등록하기 위해, Scan 대상의 basePackage를 지정하게 된다. package 값에는 Ant 패턴을 사용할 수 있다.
+
+    * 사용할 수 있는 옵션이 3개가 있다.
+
+        - `basePackage`는 패키지 아래에 있는 모든 클래스를 등록하며, comma, semicolon으로 구분한다.
+
+        - `annotation`은 해당 어노테이션이 붙어있는 클래스만 등록한다.
+
+        - `markerInterface`는 해당 마커 인터페이스를 상속한 인터페이스만 등록한다. annotation 옵션과 동시에 사용가능하며 OR 조건으로 기능한다.
+
+    1. XML방식: `<mybatis:scan base-package="" />` 사용
+
+        ```xml
+        <beans xmlns="http://www.springframework.org/schema/beans"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+            xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+            http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring.xsd">
+        
+            <!-- 실제 인터페이스가 존재하는 패키지이다. XML 설정 파일의 경로가 아니다. -->
+            <mybatis:scan base-package="org.mybatis.spring.sample.mapper" />
+
+        </beans>
+        ```
+
+    2. 어노테이션 방식: `@MapperScan("")` 사용
+
+        `@Configuration` 어노테이션이 붙은 Config 목적의 클래스에 붙여야 한다.
+
+        ```java
+        @Configuration
+        @MapperScan("org.mybatis.spring.sample.mapper")
+        public class AppConfig {
+            // 이 Config 빈에선 주로 JavaConfig로 dataSource와 transactionManager를 정의한다.
+        }
+        ```
+
+    3. `MapperScannerConfiguerer` 빈을 Spring Application Context에 등록해 사용
+
+        ```xml
+        <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+            <property name="basePackage" value="org.mybatis.spring.sample.mapper" />
+            <property name="annotationClass" value="ex.annotation.Mapper"/>
+            <property name="markerInterface" value="ex.marker.Mapper"/>
+        </bean>
+        ```
+
+    4. Mapper를 하나씩 등록하는 `MapperFactoryBean` 정의하는 방법
+
+        ```xml
+        <!-- 상속용으로 사용하기 위해 abstract=true로 설정했다. -->
+        <bean id="baseMapper" class="....MapperFactoryBean" abstract="true" lazy-init="true">
+            <property name="sqlSessionFactory" ref="sqlSessionFactory" />
+        </bean>
+
+        <!-- Spring Bean 정의 시 parent 속성을 이용하여 속성을 상속받을 수 있다. -->
+        <!-- class, lazy-init 속성을 상속받고 sqlSesionFactory를 주입받는다 -->
+        <bean id="oneMapper" parent="baseMapper">
+            <property name="mapperInterface" value="my.package.MyMapperInterface" />
+        </bean>
+
+        <bean id="anotherMapper" parent="baseMapper">
+            <property name="mapperInterface" value="my.package.MyAnotherMapperInterface" />
+        </bean>
+        ```
+
+### Mybatis-Spring을 썼을 때의 장단점
 
 ## 공통으로 적용되는 내용
 
@@ -401,7 +530,9 @@ Mybatis-spring를 사용하더라도 동일한 작업을 해야 하는 것들에
 
     ```xml
     <!-- Mybatis XML 설정파일에서 -->
-    <typeAlias type="com.someapp.model.User" alias="User"/>
+    <typeAliases>
+        <typeAlias type="com.someapp.model.User" alias="User"/>
+    </typeAliases>
 
     <!-- Mapper XML파일에서 -->
     <select id="selectUsers" resultType="User">
@@ -704,3 +835,5 @@ Mybatis-spring를 사용하더라도 동일한 작업을 해야 하는 것들에
 
 ### Mybatis에서 사용되는 객체에 대하여
 
+
+## Mybatis 처음부터 끝까지 직접 설정하기
